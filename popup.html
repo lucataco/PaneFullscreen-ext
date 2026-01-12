@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pane Fullscreen</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 280px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+    }
+
+    h1 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h1 svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .description {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #2d2d44;
+      color: #ccc;
+      border: 1px solid #3d3d5c;
+    }
+
+    .btn-secondary:hover {
+      background: #3d3d5c;
+      color: #fff;
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .status {
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      display: none;
+    }
+
+    .status.success {
+      display: block;
+      background: rgba(72, 187, 120, 0.2);
+      color: #68d391;
+      border: 1px solid rgba(72, 187, 120, 0.3);
+    }
+
+    .status.error {
+      display: block;
+      background: rgba(245, 101, 101, 0.2);
+      color: #fc8181;
+      border: 1px solid rgba(245, 101, 101, 0.3);
+    }
+
+    .status.info {
+      display: block;
+      background: rgba(66, 153, 225, 0.2);
+      color: #63b3ed;
+      border: 1px solid rgba(66, 153, 225, 0.3);
+    }
+
+    .divider {
+      height: 1px;
+      background: #3d3d5c;
+      margin: 12px 0;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #777;
+      text-align: center;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2" y="2" width="20" height="20" rx="2"/>
+      <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/>
+    </svg>
+    Pane Fullscreen
+  </h1>
+  
+  <p class="description">
+    Expand videos to fill your browser window without going into true fullscreen mode.
+  </p>
+
+  <button id="autoFullscreen" class="btn btn-primary">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="15,3 21,3 21,9"/>
+      <polyline points="9,21 3,21 3,15"/>
+      <line x1="21" y1="3" x2="14" y2="10"/>
+      <line x1="3" y1="21" x2="10" y2="14"/>
+    </svg>
+    Fullscreen Video
+  </button>
+
+  <button id="selectVideo" class="btn btn-secondary">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="22" y1="22" x2="18" y2="18"/>
+    </svg>
+    Select Video Manually
+  </button>
+
+  <div id="status" class="status"></div>
+
+  <p class="hint">Press ESC to exit pane fullscreen</p>
+
+  <script src="popup.js"></script>
+</body>
+</html>
