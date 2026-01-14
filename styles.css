@@ -15,6 +15,7 @@
   opacity: 0;
   transition: opacity 0.3s ease !important;
   box-sizing: border-box !important;
+  pointer-events: none !important; /* Allow clicks to pass through to video */
 }
 
 .pane-fullscreen-overlay.active {
@@ -30,7 +31,9 @@
   align-items: center !important;
   justify-content: center !important;
   padding: 20px !important;
+  padding-bottom: 60px !important; /* Extra space for video controls */
   box-sizing: border-box !important;
+  pointer-events: none !important; /* Allow clicks to pass through to video */
 }
 
 /* Video styling when in pane fullscreen */
@@ -42,6 +45,7 @@
   object-fit: contain !important;
   background: #000 !important;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.8) !important;
+  pointer-events: auto !important; /* Enable click interactions on video */
 }
 
 /* Close button */
@@ -61,6 +65,7 @@
   transition: all 0.2s ease !important;
   z-index: 2147483647 !important;
   padding: 0 !important;
+  pointer-events: auto !important; /* Ensure close button is clickable */
 }
 
 .pane-fullscreen-close-btn:hover {
@@ -162,6 +167,7 @@
   border: none !important;
   background: #000 !important;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.8) !important;
+  pointer-events: auto !important; /* Enable click interactions on iframe */
 }
 
 /* Container styling when in pane fullscreen */
@@ -175,6 +181,7 @@
   justify-content: center !important;
   background: #000 !important;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.8) !important;
+  pointer-events: auto !important; /* Enable click interactions on container */
 }
 
 /* Ensure iframes inside containers expand properly */
@@ -194,4 +201,34 @@
 /* Updated selection hint for players */
 .pane-fullscreen-select-mode::before {
   content: 'Click on a video or player to select it' !important;
+}
+
+/* Play/Pause indicator overlay */
+.pane-fullscreen-play-indicator {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) scale(0.8) !important;
+  width: 80px !important;
+  height: 80px !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+  pointer-events: none !important;
+  z-index: 2147483646 !important;
+}
+
+.pane-fullscreen-play-indicator.show {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1) !important;
+}
+
+.pane-fullscreen-play-indicator svg {
+  width: 40px !important;
+  height: 40px !important;
+  fill: white !important;
 }

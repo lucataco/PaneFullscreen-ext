@@ -12,6 +12,8 @@
   let elementContainer = null;
   let originalElementState = null;
   let selectMode = false;
+  let videoClickHandler = null;
+  let playIndicator = null;
 
   // Constants
   const OVERLAY_ID = 'pane-fullscreen-overlay';
@@ -357,6 +359,50 @@
   }
 
   /**
+   * Create the play/pause indicator element
+   */
+  function createPlayPauseIndicator() {
+    const indicator = document.createElement('div');
+    indicator.className = 'pane-fullscreen-play-indicator';
+    indicator.innerHTML = `
+      <svg class="play-icon" viewBox="0 0 24 24" style="display: none;">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      <svg class="pause-icon" viewBox="0 0 24 24" style="display: none;">
+        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+      </svg>
+    `;
+    return indicator;
+  }
+
+  /**
+   * Show the play/pause indicator briefly
+   */
+  function showPlayPauseIndicator(isPlaying) {
+    if (!playIndicator) return;
+    
+    const playIcon = playIndicator.querySelector('.play-icon');
+    const pauseIcon = playIndicator.querySelector('.pause-icon');
+    
+    // Show the appropriate icon (play icon when paused, pause icon when playing)
+    if (isPlaying) {
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'block';
+    } else {
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+    }
+    
+    // Show indicator
+    playIndicator.classList.add('show');
+    
+    // Hide after a short delay
+    setTimeout(() => {
+      playIndicator.classList.remove('show');
+    }, 500);
+  }
+
+  /**
    * Create the fullscreen overlay
    */
   function createOverlay() {
@@ -447,9 +493,73 @@
     // Move element to overlay container
     elementContainer.appendChild(element);
 
-    // For videos, ensure it keeps playing
-    if (type === 'video' && originalElementState.wasPlaying) {
-      element.play().catch(() => {});
+    // For videos, ensure it keeps playing and add controls
+    if (type === 'video') {
+      // Save original controls state and enable native controls
+      originalElementState.hadControls = element.hasAttribute('controls');
+      element.setAttribute('controls', '');
+      
+      // Resume playback if it was playing
+      if (originalElementState.wasPlaying) {
+        element.play().catch(() => {});
+      }
+      
+      // Create and add play/pause indicator
+      playIndicator = createPlayPauseIndicator();
+      elementContainer.appendChild(playIndicator);
+      
+      // Add click-to-pause functionality with debounce and re-enforce logic
+      let lastClickTime = 0;
+      const debounceMs = 300; // Ignore clicks within 300ms of each other
+      
+      videoClickHandler = (e) => {
+        // Don't toggle if clicking on controls (bottom 50px of video)
+        const rect = element.getBoundingClientRect();
+        const clickY = e.clientY - rect.top;
+        const controlsHeight = 50;
+        
+        if (clickY > rect.height - controlsHeight) {
+          return; // Let native controls handle the click
+        }
+        
+        // Debounce: ignore rapid clicks
+        const now = Date.now();
+        if (now - lastClickTime < debounceMs) {
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return;
+        }
+        lastClickTime = now;
+        
+        // Stop event from reaching other handlers (e.g., Twitter's player)
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        
+        if (element.paused) {
+          element.play().catch(() => {});
+          showPlayPauseIndicator(true);
+        } else {
+          // Pause the video
+          element.pause();
+          showPlayPauseIndicator(false);
+          
+          // Re-enforce pause after delays to combat auto-resume
+          // Some players try to resume after a short delay
+          setTimeout(() => {
+            if (!element.paused) element.pause();
+          }, 50);
+          setTimeout(() => {
+            if (!element.paused) element.pause();
+          }, 150);
+          setTimeout(() => {
+            if (!element.paused) element.pause();
+          }, 300);
+        }
+      };
+      // Use capture phase to intercept before other handlers
+      element.addEventListener('click', videoClickHandler, { capture: true });
     }
 
     isActive = true;
@@ -470,6 +580,26 @@
    */
   function exitPaneFullscreen() {
     if (!isActive) return;
+
+    // Clean up video-specific handlers and controls
+    if (currentElement && originalElementState && originalElementState.type === 'video') {
+      // Remove click handler
+      if (videoClickHandler) {
+        currentElement.removeEventListener('click', videoClickHandler, { capture: true });
+        videoClickHandler = null;
+      }
+      
+      // Restore original controls state
+      if (!originalElementState.hadControls) {
+        currentElement.removeAttribute('controls');
+      }
+    }
+    
+    // Clean up play indicator
+    if (playIndicator) {
+      playIndicator.remove();
+      playIndicator = null;
+    }
 
     // Restore element
     if (currentElement && originalElementState) {
